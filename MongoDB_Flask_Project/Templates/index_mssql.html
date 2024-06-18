@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSSQL Interface</title>
+    <style>
+        pre {
+            white-space: pre-wrap; /* CSS3 */
+            white-space: -moz-pre-wrap; /* Firefox */
+            white-space: -pre-wrap; /* Opera <7 */
+            white-space: -o-pre-wrap; /* Opera 7 */
+            word-wrap: break-word; /* IE */
+        }
+    </style>
+</head>
+<body>
+    <h1>MSSQL Interface</h1>
+
+    <h2>Insert Document</h2>
+    <form id="insertForm">
+        <input type="text" id="insertData" placeholder='{"column": "value"}' required>
+        <button type="submit">Insert</button>
+    </form>
+
+    <h2>Retrieve Documents</h2>
+    <button onclick="retrieveDocuments()">Retrieve</button>
+    <pre id="retrieveResults"></pre>
+
+    <h2>Update Document</h2>
+    <form id="updateForm">
+        <input type="text" id="updateQuery" placeholder='{"column": "value"}' required>
+        <input type="text" id="updateData" placeholder='{"column": "new_value"}' required>
+        <button type="submit">Update</button>
+    </form>
+
+    <h2>Delete Document</h2>
+    <form id="deleteForm">
+        <input type="text" id="deleteQuery" placeholder='{"column": "value"}' required>
+        <button type="submit">Delete</button>
+    </form>
+
+    <h2>Aggregate Data</h2>
+    <button onclick="aggregateData()">Aggregate</button>
+    <pre id="aggregateResults"></pre>
+
+    <script>
+        document.getElementById('insertForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const data = JSON.parse(document.getElementById('insertData').value);
+            fetch('/insert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        });
+
+        function retrieveDocuments() {
+            fetch('/retrieve')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('retrieveResults').innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error retrieving documents:', error));
+        }
+
+        document.getElementById('updateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = JSON.parse(document.getElementById('updateQuery').value);
+            const update = JSON.parse(document.getElementById('updateData').value);
+            fetch('/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query, update: update }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        });
+
+        document.getElementById('deleteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = JSON.parse(document.getElementById('deleteQuery').value);
+            fetch('/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(query),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        });
+
+        function aggregateData() {
+            fetch('/aggregate')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('aggregateResults').innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error aggregating data:', error));
+        }
+    </script>
+</body>
+</html>
